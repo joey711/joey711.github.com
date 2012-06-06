@@ -1,0 +1,42 @@
+How does this work? What sort of markdown is this?
+
+Well, according to [This Rblogger post about the R Markdown feature](http://www.r-bloggers.com/announcing-the-r-markdown-package/), it supports [GitHub Flavored Markdown (GFM)](https://github.github.com/github-flavored-markdown) and therefore the source code blocks within GFM. Does this mean if I make a source code block in `Rmd`, it automatically knows that it is R code? Does it also compile the R code? Will it perform nice text-highlighting on the code? I hope so.
+
+Let's find out. First, let's load [the phyloseq package](https://github.com/joey711/phyloseq), which can be [installed using these instructions](https://github.com/joey711/phyloseq/wiki/Installation), and has [other examples and descriptions in the phyloseq wiki](https://github.com/joey711/phyloseq/wiki)
+
+```{r message=FALSE}
+library("phyloseq")
+library("ggplot2")
+```
+
+For a small, trivially-simple example, use the 3-sample, ~100-species `esophagus` dataset
+
+```{r}
+data(esophagus)
+```
+
+Now load the ape package, and retrieve the patristic distances between taxa using `cophenetic.phylo`. Will need to convert output from cophenetic into a `"dist"` class object using the `dist` function.
+
+```{r}
+library("ape")
+eso.dist <- dist(cophenetic(tre(esophagus)))
+```
+
+What is the range of distance values for `eso.dist`?
+
+```{r}
+range(eso.dist)
+```
+
+Now provide this custom `"dist"`ance object to `make_network` to create an `igraph` network object. Note that we need to select a value for a distance threshold that seems useful for a cophenetic distance (we will repeat later on with a co-occurrence distance, Jaccard).
+
+```{r cache=TRUE}
+eg <- make_network(esophagus, "species", eso.dist, 0.3)
+```
+
+Now create a plot of this species network using `plot_network`.
+
+```{r plotNetworkExample, fig.width=8, fig.width=7}
+p <- plot_network(eg, esophagus, "species")
+print(p)
+```
